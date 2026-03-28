@@ -17,8 +17,6 @@ pub enum ConfigError {
     Serde(#[from] serde_json::Error),
     #[error("Encryption error: {0}")]
     Encryption(String),
-    #[error("Config not found")]
-    NotFound,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

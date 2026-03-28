@@ -50,7 +50,7 @@ impl ProxyServer {
             }
 
             match listener.accept().await {
-                Ok((mut stream, client_addr)) => {
+                Ok((stream, client_addr)) => {
                     let config = self.config.clone();
                     let client = self.http_client.clone();
                     let shutdown = self.shutdown_signal.clone();

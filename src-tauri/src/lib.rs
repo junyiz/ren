@@ -1,7 +1,7 @@
 mod config;
 mod proxy;
 
-use config::{ProxyConfig, load_config, save_config, encrypt_api_key, decrypt_api_key};
+use config::{ProxyConfig, load_config, save_config, encrypt_api_key};
 use proxy::ProxyServer;
 use std::sync::Mutex;
 use tauri::State;
