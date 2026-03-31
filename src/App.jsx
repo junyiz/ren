@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
-import { Form, Select, InputNumber, Button, Card, Space, Typography, message } from 'antd'
+import { Form, Select, InputNumber, Input, Button, Card, Space, Typography, message } from 'antd'
 
 const { Title, Text } = Typography
 
@@ -114,7 +114,7 @@ function App() {
             </Form.Item>
           </Space>
           <Form.Item name="upstreamUrl" label="Upstream URL">
-            <InputNumber />
+            <Input />
           </Form.Item>
         </Form>
       </Card>
