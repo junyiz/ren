@@ -3,7 +3,10 @@ mod proxy;
 
 use config::{ProxyConfig, load_config, save_config, encrypt_api_key};
 use proxy::ProxyServer;
+use std::net::ToSocketAddrs;
 use std::sync::Mutex;
+use std::process::{Command, Stdio};
+use std::time::Duration;
 use tauri::State;
 use tracing::{info, error, Level};
 use tracing_subscriber::FmtSubscriber;
@@ -12,6 +15,12 @@ use tracing_appender::rolling::{RollingFileAppender, Rotation};
 struct AppState {
     server: Mutex<Option<ProxyServer>>,
     config: Mutex<ProxyConfig>,
+    tunnel: Mutex<Option<TunnelState>>,
+}
+
+struct TunnelState {
+    process: std::process::Child,
+    public_url: String,
 }
 
 #[tauri::command]
@@ -99,6 +108,14 @@ fn stop_proxy(state: State<AppState>) -> Result<(), String> {
     let config = state.config.lock().unwrap().clone();
     let mut server_guard = state.server.lock().unwrap();
 
+    // Stop tunnel if running
+    let mut tunnel_guard = state.tunnel.lock().unwrap();
+    if let Some(mut tunnel) = tunnel_guard.take() {
+        info!("Stopping tunnel: {}", tunnel.public_url);
+        tunnel.process.kill().ok();
+    }
+    drop(tunnel_guard);
+
     if let Some(server) = server_guard.take() {
         server.shutdown();
 
@@ -133,6 +150,121 @@ fn get_local_ip() -> Result<String, String> {
     local_ip_address::local_ip()
         .map(|ip| ip.to_string())
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn start_tunnel(state: State<AppState>, port: u16, relay: String) -> Result<String, String> {
+    let mut tunnel_guard = state.tunnel.lock().unwrap();
+
+    if tunnel_guard.is_some() {
+        return Err("Tunnel already running".to_string());
+    }
+
+    info!("Starting tunelo tunnel for port {} via {}", port, relay);
+
+    // Check if tunelo is available
+    let tunelo_check = Command::new("tunelo")
+        .arg("--version")
+        .output();
+
+    if tunelo_check.is_err() {
+        return Err("tunelo not found. Please install it: https://tunelo.net".to_string());
+    }
+
+    // Build tunelo command with relay
+    let relay_arg = format!("{}:4433", relay);
+
+    // Start tunelo process
+    let mut child = Command::new("tunelo")
+        .args(["port", &port.to_string(), "--relay", &relay_arg])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to start tunelo: {}", e))?;
+
+    // Take stdout to read from it
+    let mut stdout = child.stdout.take().ok_or("Failed to capture tunelo output")?;
+
+    // Read tunelo output with timeout (in a separate thread to avoid blocking)
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        use std::io::Read;
+        let mut buf = [0u8; 4096];
+        let mut public_url = String::new();
+        let start = std::time::Instant::now();
+        let timeout = Duration::from_secs(30);
+
+        loop {
+            if start.elapsed() > timeout {
+                break;
+            }
+            match stdout.read(&mut buf) {
+                Ok(0) => break,
+                Ok(n) => {
+                    if let Ok(s) = std::str::from_utf8(&buf[..n]) {
+                        // Log the output
+                        for line in s.lines() {
+                            info!("tunelo: {}", line);
+                            if line.contains("Public URL:") {
+                                public_url = line.split("Public URL:").nth(1)
+                                    .map(|s| s.trim().to_string())
+                                    .unwrap_or_default();
+                                break;
+                            }
+                        }
+                        if !public_url.is_empty() {
+                            break;
+                        }
+                    }
+                }
+                Err(_) => break,
+            }
+            std::thread::sleep(Duration::from_millis(50));
+        }
+        let _ = tx.send(public_url);
+    });
+
+    // Wait for the URL with a timeout
+    let public_url = match rx.recv_timeout(Duration::from_secs(35)) {
+        Ok(url) => url,
+        Err(_) => {
+            child.kill().ok();
+            return Err("Timeout waiting for tunnel URL".to_string());
+        }
+    };
+
+    if public_url.is_empty() {
+        child.kill().ok();
+        return Err("Failed to get public URL from tunelo".to_string());
+    }
+
+    tunnel_guard.replace(TunnelState {
+        process: child,
+        public_url: public_url.clone(),
+    });
+
+    info!("Tunnel started: {}", public_url);
+    Ok(public_url)
+}
+
+#[tauri::command]
+fn stop_tunnel(state: State<AppState>) -> Result<(), String> {
+    let mut tunnel_guard = state.tunnel.lock().unwrap();
+
+    if let Some(mut tunnel) = tunnel_guard.take() {
+        info!("Stopping tunnel: {}", tunnel.public_url);
+        tunnel.process.kill().map_err(|e| format!("Failed to stop tunnel: {}", e))?;
+        info!("Tunnel stopped");
+        Ok(())
+    } else {
+        Err("Tunnel not running".to_string())
+    }
+}
+
+#[tauri::command]
+fn get_tunnel_status(state: State<AppState>) -> Result<Option<String>, String> {
+    let tunnel_guard = state.tunnel.lock().unwrap();
+    Ok(tunnel_guard.as_ref().map(|t| t.public_url.clone()))
 }
 
 fn setup_logging() {
@@ -170,6 +302,7 @@ pub fn run() {
         .manage(AppState {
             server: Mutex::new(None),
             config: Mutex::new(config),
+            tunnel: Mutex::new(None),
         })
         .invoke_handler(tauri::generate_handler![
             get_config,
@@ -178,6 +311,9 @@ pub fn run() {
             stop_proxy,
             get_proxy_status,
             get_local_ip,
+            start_tunnel,
+            stop_tunnel,
+            get_tunnel_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
