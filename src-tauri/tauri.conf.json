@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "im.ren.api-proxy",
   "build": {
-    "frontendDist": "../src"
+    "frontendDist": "../dist"
   },
   "app": {
     "withGlobalTauri": true,
@@ -12,7 +12,7 @@
       {
         "title": "Ren API Proxy",
         "width": 640,
-        "height": 800,
+        "height": 700,
         "resizable": true,
         "center": true,
         "devtools": true
