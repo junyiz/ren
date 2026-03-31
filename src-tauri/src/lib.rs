@@ -58,6 +58,12 @@ fn start_proxy(state: State<AppState>) -> Result<String, String> {
         return Err("Proxy already running".to_string());
     }
 
+    // First, try to bind to verify port is available
+    let test_socket = std::net::TcpListener::bind(format!("0.0.0.0:{}", config.port))
+        .map_err(|e| format!("Port {} is already in use: {}", config.port, e))?;
+    test_socket.set_nonblocking(true).ok();
+    drop(test_socket); // Release the port immediately
+
     let server = ProxyServer::new(config);
     let server_clone = std::sync::Arc::new(server);
 
@@ -68,6 +74,7 @@ fn start_proxy(state: State<AppState>) -> Result<String, String> {
 
     let proxy_url = format!("http://{}:{}/v1", local_ip, server_clone.config.port);
 
+    // Start the server in background
     let server_ref = server_clone.clone();
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -77,6 +84,9 @@ fn start_proxy(state: State<AppState>) -> Result<String, String> {
             }
         });
     });
+
+    // Wait a bit for server to start
+    std::thread::sleep(std::time::Duration::from_millis(500));
 
     *server_guard = Some((*server_clone).clone());
 

@@ -1,7 +1,6 @@
 use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tokio::net::TcpListener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tracing::{info, error};
 
@@ -33,8 +32,14 @@ impl ProxyServer {
     }
 
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+        // Create socket with SO_REUSEADDR enabled
+        let socket = tokio::net::TcpSocket::new_v4()?;
+        socket.set_reuseaddr(true)?;
+
         let addr = SocketAddr::from(([0, 0, 0, 0], self.config.port));
-        let listener = TcpListener::bind(addr).await?;
+        socket.bind(addr)?;
+        let listener = socket.listen(100)?;
+
         info!("Proxy server listening on {}", addr);
 
         // Get local IP for display
@@ -129,7 +134,7 @@ async fn handle_connection(
         }
     }
 
-    let body = lines[body_start..].join("\r\n");
+    let body = lines[body_start..].join("\n");
 
     // Get API key
     let api_key = decrypt_api_key(&config.api_key)
@@ -174,8 +179,13 @@ async fn handle_connection(
     let mut response = format!("HTTP/1.1 {} {}\r\n", status.as_u16(), status.canonical_reason().unwrap_or("Unknown"));
 
     for (key, value) in headers.iter() {
+        // Skip transfer-encoding since we're sending the body directly
+        let key_str = key.as_str();
+        if key_str.eq_ignore_ascii_case("transfer-encoding") {
+            continue;
+        }
         if let Ok(v) = value.to_str() {
-            response.push_str(&format!("{}: {}\r\n", key, v));
+            response.push_str(&format!("{}: {}\r\n", key_str, v));
         }
     }
     response.push_str("\r\n");
