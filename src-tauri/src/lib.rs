@@ -96,11 +96,26 @@ fn start_proxy(state: State<AppState>) -> Result<String, String> {
 
 #[tauri::command]
 fn stop_proxy(state: State<AppState>) -> Result<(), String> {
+    let config = state.config.lock().unwrap().clone();
     let mut server_guard = state.server.lock().unwrap();
 
     if let Some(server) = server_guard.take() {
         server.shutdown();
-        info!("Proxy stopped");
+
+        // Wait for the server to release the port
+        std::thread::sleep(std::time::Duration::from_millis(200));
+
+        // Verify port is released by trying to bind
+        match std::net::TcpListener::bind(format!("0.0.0.0:{}", config.port)) {
+            Ok(listener) => {
+                drop(listener);
+                info!("Proxy stopped, port {} released", config.port);
+            }
+            Err(e) => {
+                info!("Proxy stopped, port {} may still be in use: {}", config.port, e);
+            }
+        }
+
         Ok(())
     } else {
         Err("Proxy not running".to_string())
