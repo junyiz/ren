@@ -71,7 +71,8 @@ function App() {
       setIsRunning(true)
       message.success('Proxy started')
     } catch (e) {
-      message.error('Failed to start: ' + e)
+      const errorMsg = e?.message || e?.toString() || String(e)
+      message.error('Failed to start: ' + errorMsg)
     } finally {
       setLoading(false)
     }
