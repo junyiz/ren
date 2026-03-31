@@ -2,6 +2,7 @@ use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::time;
 use tracing::{info, error};
 
 use crate::config::{decrypt_api_key, ProxyConfig};
@@ -49,13 +50,19 @@ impl ProxyServer {
         }
 
         loop {
+            // Check shutdown signal before accept to allow quick shutdown
             if self.shutdown_signal.load(std::sync::atomic::Ordering::SeqCst) {
                 info!("Shutdown signal received");
+                drop(listener); // Explicitly close the listener to release port
                 break;
             }
 
-            match listener.accept().await {
-                Ok((stream, client_addr)) => {
+            // Use timeout to allow checking shutdown signal periodically
+            match tokio::time::timeout(
+                std::time::Duration::from_millis(500),
+                listener.accept()
+            ).await {
+                Ok(Ok((stream, client_addr))) => {
                     let config = self.config.clone();
                     let client = self.http_client.clone();
                     let shutdown = self.shutdown_signal.clone();
@@ -66,12 +73,22 @@ impl ProxyServer {
                         }
                     });
                 }
-                Err(e) => {
+                Ok(Err(e)) => {
+                    // Listener closed or error
+                    if self.shutdown_signal.load(std::sync::atomic::Ordering::SeqCst) {
+                        info!("Listener closed due to shutdown");
+                        break;
+                    }
                     error!("Accept error: {}", e);
+                }
+                Err(_) => {
+                    // Timeout, check shutdown and continue
+                    continue;
                 }
             }
         }
 
+        info!("Proxy server stopped");
         Ok(())
     }
 }
