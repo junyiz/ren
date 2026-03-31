@@ -2,7 +2,6 @@ use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::time;
 use tracing::{info, error};
 
 use crate::config::{decrypt_api_key, ProxyConfig};
