@@ -51,13 +51,12 @@ function App() {
   }
 
   const handleStart = async () => {
+    const values = await form.validateFields()
+    if (!values.apiKey) {
+      message.error('Please enter your API key')
+      return
+    }
     try {
-      const values = await form.validateFields()
-      if (!values.apiKey) {
-        message.error('Please enter your API key')
-        return
-      }
-
       setLoading(true)
       await invoke('save_proxy_config', {
         provider: values.provider,
@@ -71,8 +70,7 @@ function App() {
       setIsRunning(true)
       message.success('Proxy started')
     } catch (e) {
-      const errorMsg = e?.message || e?.toString() || String(e)
-      message.error('Failed to start: ' + errorMsg)
+      message.error('Failed to start: ' + e)
     } finally {
       setLoading(false)
     }
@@ -101,36 +99,43 @@ function App() {
 
       <Card className="section-card">
         <div className="section-label">Provider Settings</div>
-        <Form form={form} layout="vertical">
-          <Space size={16} style={{ width: '100%' }}>
-            <Form.Item name="provider" style={{ flex: 1 }}>
-              <Select
-                options={PROVIDER_OPTIONS}
-                onChange={handleProviderChange}
-                placeholder="Select provider"
-              />
-            </Form.Item>
-            <Form.Item name="port" initialValue={8080} style={{ width: 120 }}>
-              <InputNumber min={1024} max={65535} style={{ width: '100%' }} />
-            </Form.Item>
-          </Space>
-          <Form.Item name="upstreamUrl" label="Upstream URL">
+        <Form form={form}>
+          <Form.Item
+            name="provider"
+            label="Provider"
+            rules={[{ required: true, message: 'Please select a provider' }]}
+          >
+            <Select
+              options={PROVIDER_OPTIONS}
+              onChange={handleProviderChange}
+              placeholder="Select provider"
+            />
+          </Form.Item>
+          <Form.Item
+            name="upstreamUrl"
+            label="Upstream URL"
+            rules={[{ required: true, message: 'Please enter the upstream URL' }]}
+          >
             <Input />
           </Form.Item>
-        </Form>
-      </Card>
-
-      <Card className="section-card">
-        <div className="section-label">Authentication</div>
-        <Form form={form} layout="vertical">
           <Form.Item
             name="apiKey"
+            label="API Key"
             rules={[{ required: true, message: 'Please enter your API key' }]}
           >
             <Input.Password
               placeholder="sk-..."
               size="large"
             />
+          </Form.Item>
+        </Form>
+      </Card>
+
+      <Card className="section-card">
+        <div className="section-label">Local Settings</div>
+        <Form form={form}>
+          <Form.Item name="port" label="Port" initialValue={8080}>
+            <InputNumber style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Card>
