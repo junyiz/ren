@@ -3,7 +3,6 @@ mod proxy;
 
 use config::{ProxyConfig, load_config, save_config, encrypt_api_key};
 use proxy::ProxyServer;
-use std::net::ToSocketAddrs;
 use std::sync::Mutex;
 use std::process::{Command, Stdio};
 use std::time::Duration;
@@ -152,6 +151,89 @@ fn get_local_ip() -> Result<String, String> {
         .map_err(|e| e.to_string())
 }
 
+// Get the platform-specific tunelo binary, downloading if necessary
+fn get_tunelo_binary() -> Result<std::path::PathBuf, String> {
+    // First check if tunelo is available in PATH
+    let tunelo_check = Command::new("tunelo")
+        .arg("--version")
+        .output();
+
+    if let Ok(output) = tunelo_check {
+        if output.status.success() {
+            eprintln!("[DEBUG] tunelo found in PATH");
+            return Ok(std::path::PathBuf::from("tunelo"));
+        }
+    }
+
+    eprintln!("[DEBUG] tunelo not in PATH, will download");
+
+    // Determine platform
+    let (os, arch) = {
+        #[cfg(target_os = "linux")]
+        {
+            ("linux", "amd64")
+        }
+        #[cfg(target_os = "macos")]
+        {
+            #[cfg(target_arch = "aarch64")]
+            {("macos", "arm64")}
+            #[cfg(not(target_arch = "aarch64"))]
+            {("macos", "amd64")}
+        }
+        #[cfg(target_os = "windows")]
+        {
+            ("windows", "amd64")
+        }
+        #[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+        {
+            return Err("Unsupported platform".to_string());
+        }
+    };
+
+    let binary_name = format!("tunelo-{}-{}", os, arch);
+    #[cfg(target_os = "windows")]
+    let binary_name = format!("{}.exe", binary_name);
+
+    let download_url = format!("https://ren.im/tunelo/{}", binary_name);
+
+    info!("Downloading tunelo from {}", download_url);
+
+    // Create temp directory
+    let temp_dir = std::env::temp_dir().join("ren-tunelo");
+    std::fs::create_dir_all(&temp_dir).map_err(|e| format!("Failed to create temp dir: {}", e))?;
+
+    let binary_path = temp_dir.join(&binary_name);
+
+    eprintln!("[DEBUG] binary_path: {:?}", binary_path);
+
+    // Download the binary using blocking reqwest
+    let client = reqwest::blocking::Client::new();
+    let response = client.get(&download_url)
+        .send()
+        .map_err(|e| format!("Failed to download tunelo: {}", e))?;
+
+    let bytes = response.bytes()
+        .map_err(|e| format!("Failed to read response: {}", e))?;
+
+    std::fs::write(&binary_path, &bytes)
+        .map_err(|e| format!("Failed to write binary: {}", e))?;
+
+    // Set executable permission
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = std::fs::metadata(&binary_path)
+            .map_err(|e| format!("Failed to get permissions: {}", e))?
+            .permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&binary_path, perms)
+            .map_err(|e| format!("Failed to set permissions: {}", e))?;
+    }
+
+    info!("tunelo downloaded to {:?}", binary_path);
+    Ok(binary_path)
+}
+
 #[tauri::command]
 fn start_tunnel(state: State<AppState>, port: u16, relay: String) -> Result<String, String> {
     let mut tunnel_guard = state.tunnel.lock().unwrap();
@@ -162,20 +244,14 @@ fn start_tunnel(state: State<AppState>, port: u16, relay: String) -> Result<Stri
 
     info!("Starting tunelo tunnel for port {} via {}", port, relay);
 
-    // Check if tunelo is available
-    let tunelo_check = Command::new("tunelo")
-        .arg("--version")
-        .output();
-
-    if tunelo_check.is_err() {
-        return Err("tunelo not found. Please install it: https://tunelo.net".to_string());
-    }
+    // Get tunelo binary (downloads if necessary)
+    let tunelo_path = get_tunelo_binary()?;
 
     // Build tunelo command with relay
     let relay_arg = format!("{}:4433", relay);
 
     // Start tunelo process
-    let mut child = Command::new("tunelo")
+    let mut child = Command::new(&tunelo_path)
         .args(["port", &port.to_string(), "--relay", &relay_arg])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
