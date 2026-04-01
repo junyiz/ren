@@ -197,18 +197,23 @@ function App() {
       </div>
 
       <Collapse
+        bordered={false}
+        style={{ background: "#fff" }}
         activeKey={configExpanded ? ["config"] : []}
         onChange={(keys) => setConfigExpanded(keys.includes("config"))}
         items={[
           {
             key: "config",
-            label: "Provider Settings",
+            label: "Config Settings",
             children: (
               <Form form={form}>
+                <div className="config-label">Provider Settings</div>
                 <Form.Item
                   name="provider"
                   label="Provider"
-                  rules={[{ required: true, message: "Please select a provider" }]}
+                  rules={[
+                    { required: true, message: "Please select a provider" },
+                  ]}
                 >
                   <Select
                     options={PROVIDER_OPTIONS}
@@ -221,7 +226,10 @@ function App() {
                   name="upstreamUrl"
                   label="Upstream URL"
                   rules={[
-                    { required: true, message: "Please enter the upstream URL" },
+                    {
+                      required: true,
+                      message: "Please enter the upstream URL",
+                    },
                   ]}
                 >
                   <Input disabled={isRunning} />
@@ -229,7 +237,9 @@ function App() {
                 <Form.Item
                   name="apiKey"
                   label="API Key"
-                  rules={[{ required: true, message: "Please enter your API key" }]}
+                  rules={[
+                    { required: true, message: "Please enter your API key" },
+                  ]}
                 >
                   <Input.Password
                     placeholder="sk-..."
@@ -237,12 +247,12 @@ function App() {
                     disabled={isRunning}
                   />
                 </Form.Item>
-                <div className="section-label">Local Settings</div>
+                <div className="config-label">Local Settings</div>
                 <Form.Item name="port" label="Port" initialValue={8080}>
                   <InputNumber style={{ width: "100%" }} disabled={isRunning} />
                 </Form.Item>
                 <div
-                  className="section-label"
+                  className="config-label"
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -260,7 +270,10 @@ function App() {
                   Enable to create a public tunnel and share over the internet
                 </Text>
                 {publicAccess && (
-                  <Form.Item label="Relay" style={{ marginTop: 12, marginBottom: 0 }}>
+                  <Form.Item
+                    label="Relay"
+                    style={{ marginTop: 12, marginBottom: 0 }}
+                  >
                     <Select
                       value={relay}
                       onChange={setRelay}
