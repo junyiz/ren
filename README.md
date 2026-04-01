@@ -46,9 +46,18 @@ Set your client's `base_url` to the URL shown in the app:
 from openai import AsyncOpenAI
 
 client = AsyncOpenAI(
-    base_url="http://192.168.1.x:8080/v1",  # Use the URL from the app
+    base_url="http://192.168.1.x:8090/v1",  # Use the URL from the app
     api_key="anything"  # Can be anything, won't be used
 )
+```
+
+```bash
+curl -s https://stupendous-division-5473.ren.im/v1/chat/completions \
+    -H "Content-Type: application/json" \
+    -d '{
+      "model": "kimi-k2.5",
+      "messages": [{"role": "user", "content": "hi"}]
+    }'
 ```
 
 ## Security
@@ -67,3 +76,6 @@ npm run tauri dev
 # Build for production
 npm run tauri build
 ```
+
+## Acknowledgments
+[tunelo](https://tunelo.net) · [plano](https://github.com/katanemo/plano)
