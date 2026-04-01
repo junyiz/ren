@@ -8,20 +8,12 @@ on:
 
 jobs:
   build:
+    runs-on: ${{ matrix.platform }}
+
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: "macos-latest"
-            args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest"
-            args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-22.04"
-            args: ""
-          - platform: "windows-latest"
-            args: ""
-
-    runs-on: ${{ matrix.platform }}
+        platform: [macos-latest, ubuntu-22.04, windows-latest]
 
     steps:
       - name: Checkout repository
@@ -34,9 +26,7 @@ jobs:
           cache: "pnpm"
 
       - name: Setup Rust
-        uses: dtolnay/rust-action@stable
-        with:
-          targets: ${{ matrix.platform == 'macos-latest' && matrix.args == '--target aarch64-apple-darwin' && 'aarch64-apple-darwin' || '' }}
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install frontend dependencies
         run: pnpm install
@@ -45,5 +35,3 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: ${{ matrix.args }}

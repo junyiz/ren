@@ -11,18 +11,11 @@ jobs:
       contents: write
 
     runs-on: ${{ matrix.platform }}
+
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: "macos-latest"
-            target: "aarch64-apple-darwin"
-          - platform: "macos-latest"
-            target: "x86_64-apple-darwin"
-          - platform: "ubuntu-22.04"
-            target: ""
-          - platform: "windows-latest"
-            target: ""
+        platform: [macos-latest, ubuntu-22.04, windows-latest]
 
     steps:
       - name: Checkout repository
@@ -35,7 +28,7 @@ jobs:
           cache: "pnpm"
 
       - name: Setup Rust
-        uses: dtolnay/rust-action@stable
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Install frontend dependencies
         run: pnpm install
@@ -51,4 +44,3 @@ jobs:
             See https://github.com/junyiz/ren/releases for the changelog.
           releaseDraft: true
           prerelease: false
-          target: ${{ matrix.target }}
