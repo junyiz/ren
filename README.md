@@ -1,10 +1,10 @@
 # Ren API Proxy
 
-Desktop application for sharing LLM API keys within LAN or over the internet without exposing keys.
+Desktop application for sharing LLM API within LAN or over the internet without exposing keys.
 
 ## Features
 
-- Share your OpenAI/Anthropic/Ollama API keys with others on your network
+- Share your OpenAI/Anthropic/Ollama API with others on your network
 - Your API key never leaves your device
 - Simple one-click setup
 - Works with any OpenAI-compatible client
