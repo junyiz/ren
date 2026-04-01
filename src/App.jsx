@@ -169,7 +169,7 @@ function App() {
     <div className="app-container">
       <div className="app-header">
         <Title level={3} style={{ margin: 0 }}>Ren API Proxy</Title>
-        <Text type="secondary">Share your LLM API within LAN safely</Text>
+        <Text type="secondary">Share your LLM API safely within LAN or over the internet</Text>
       </div>
 
       <Card className="section-card">
@@ -227,7 +227,7 @@ function App() {
           />
         </div>
         <Text type="secondary" style={{ fontSize: 12 }}>
-          Enable to create a public tunnel via tunelo
+          Enable to create a public tunnel and share over the internet
         </Text>
         {publicAccess && (
           <Form.Item label="Relay" style={{ marginTop: 12, marginBottom: 0 }}>
