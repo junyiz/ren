@@ -11,6 +11,7 @@ import {
   message,
   Switch,
   Modal,
+  Collapse,
 } from "antd";
 import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 
@@ -195,75 +196,84 @@ function App() {
         </Text>
       </div>
 
-      <Card className="section-card" collapsible collapsed={!configExpanded} onCollapse={(collapsed) => setConfigExpanded(collapsed)}>
-        <div className="section-label">Provider Settings</div>
-        <Form form={form}>
-          <Form.Item
-            name="provider"
-            label="Provider"
-            rules={[{ required: true, message: "Please select a provider" }]}
-          >
-            <Select
-              options={PROVIDER_OPTIONS}
-              onChange={handleProviderChange}
-              placeholder="Select provider"
-              disabled={isRunning}
-            />
-          </Form.Item>
-          <Form.Item
-            name="upstreamUrl"
-            label="Upstream URL"
-            rules={[
-              { required: true, message: "Please enter the upstream URL" },
-            ]}
-          >
-            <Input disabled={isRunning} />
-          </Form.Item>
-          <Form.Item
-            name="apiKey"
-            label="API Key"
-            rules={[{ required: true, message: "Please enter your API key" }]}
-          >
-            <Input.Password
-              placeholder="sk-..."
-              size="large"
-              disabled={isRunning}
-            />
-          </Form.Item>
-          <div className="section-label">Local Settings</div>
-          <Form.Item name="port" label="Port" initialValue={8080}>
-            <InputNumber style={{ width: "100%" }} disabled={isRunning} />
-          </Form.Item>
-          <div
-            className="section-label"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span>Public Access</span>
-            <Switch
-              checked={publicAccess}
-              onChange={handlePublicAccessChange}
-              disabled={isRunning}
-            />
-          </div>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            Enable to create a public tunnel and share over the internet
-          </Text>
-          {publicAccess && (
-            <Form.Item label="Relay" style={{ marginTop: 12, marginBottom: 0 }}>
-              <Select
-                value={relay}
-                onChange={setRelay}
-                options={RELAY_OPTIONS}
-                disabled={isRunning}
-              />
-            </Form.Item>
-          )}
-        </Form>
-      </Card>
+      <Collapse
+        activeKey={configExpanded ? ["config"] : []}
+        onChange={(keys) => setConfigExpanded(keys.includes("config"))}
+        items={[
+          {
+            key: "config",
+            label: "Provider Settings",
+            children: (
+              <Form form={form}>
+                <Form.Item
+                  name="provider"
+                  label="Provider"
+                  rules={[{ required: true, message: "Please select a provider" }]}
+                >
+                  <Select
+                    options={PROVIDER_OPTIONS}
+                    onChange={handleProviderChange}
+                    placeholder="Select provider"
+                    disabled={isRunning}
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="upstreamUrl"
+                  label="Upstream URL"
+                  rules={[
+                    { required: true, message: "Please enter the upstream URL" },
+                  ]}
+                >
+                  <Input disabled={isRunning} />
+                </Form.Item>
+                <Form.Item
+                  name="apiKey"
+                  label="API Key"
+                  rules={[{ required: true, message: "Please enter your API key" }]}
+                >
+                  <Input.Password
+                    placeholder="sk-..."
+                    size="large"
+                    disabled={isRunning}
+                  />
+                </Form.Item>
+                <div className="section-label">Local Settings</div>
+                <Form.Item name="port" label="Port" initialValue={8080}>
+                  <InputNumber style={{ width: "100%" }} disabled={isRunning} />
+                </Form.Item>
+                <div
+                  className="section-label"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span>Public Access</span>
+                  <Switch
+                    checked={publicAccess}
+                    onChange={handlePublicAccessChange}
+                    disabled={isRunning}
+                  />
+                </div>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  Enable to create a public tunnel and share over the internet
+                </Text>
+                {publicAccess && (
+                  <Form.Item label="Relay" style={{ marginTop: 12, marginBottom: 0 }}>
+                    <Select
+                      value={relay}
+                      onChange={setRelay}
+                      options={RELAY_OPTIONS}
+                      disabled={isRunning}
+                    />
+                  </Form.Item>
+                )}
+              </Form>
+            ),
+          },
+        ]}
+      />
 
       <div className="status-bar">
         <div className={`status-pill ${isRunning ? "active" : ""}`}>
