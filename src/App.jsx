@@ -16,40 +16,6 @@ import { CopyOutlined, CheckOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-function CopyableUrl({ url, label }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      message.success("Copied to clipboard");
-      setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      message.error("Failed to copy");
-    }
-  };
-
-  return (
-    <div className="url-card">
-      <div className="section-label">{label}</div>
-      <Input
-        value={url}
-        readOnly
-        addonAfter={
-          <Button
-            type="text"
-            icon={copied ? <CheckOutlined /> : <CopyOutlined />}
-            onClick={handleCopy}
-            style={{ height: 28 }}
-          />
-        }
-        style={{ fontFamily: "monospace" }}
-      />
-    </div>
-  );
-}
-
 function UrlList({ urls }) {
   return (
     <Card className="url-card">
@@ -104,6 +70,7 @@ function App() {
   const [publicAccess, setPublicAccess] = useState(false);
   const [relay, setRelay] = useState("ren.im");
   const [loading, setLoading] = useState(false);
+  const [configExpanded, setConfigExpanded] = useState(true);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -188,6 +155,7 @@ function App() {
       }
 
       setIsRunning(true);
+      setConfigExpanded(false);
       message.success("Proxy started");
     } catch (e) {
       message.error("Failed to start: " + e);
@@ -201,6 +169,7 @@ function App() {
       setLoading(true);
       await invoke("stop_proxy");
       setIsRunning(false);
+      setConfigExpanded(true);
       setProxyUrl("");
       setPublicUrl("");
       message.success("Proxy stopped");
@@ -226,7 +195,7 @@ function App() {
         </Text>
       </div>
 
-      <Card className="section-card">
+      <Card className="section-card" collapsible collapsed={!configExpanded} onCollapse={(collapsed) => setConfigExpanded(collapsed)}>
         <div className="section-label">Provider Settings</div>
         <Form form={form}>
           <Form.Item
@@ -328,7 +297,9 @@ function App() {
         <UrlList
           urls={[
             { url: proxyUrl, label: "Local URL (LAN)" },
-            ...(publicUrl ? [{ url: publicUrl, label: "Public URL (Internet)" }] : []),
+            ...(publicUrl
+              ? [{ url: publicUrl, label: "Public URL (Internet)" }]
+              : []),
           ]}
         />
       )}
