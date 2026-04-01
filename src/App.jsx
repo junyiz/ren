@@ -1,8 +1,43 @@
 import { useState, useEffect } from 'react'
 import { invoke } from '@tauri-apps/api/core'
 import { Form, Select, InputNumber, Input, Button, Card, Space, Typography, message, Switch, Modal } from 'antd'
+import { CopyOutlined, CheckOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
+
+function CopyableUrl({ url, label }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      message.success('Copied to clipboard')
+      setTimeout(() => setCopied(false), 2000)
+    } catch (e) {
+      message.error('Failed to copy')
+    }
+  }
+
+  return (
+    <Card className="url-card">
+      <div className="section-label">{label}</div>
+      <Input
+        value={url}
+        readOnly
+        addonAfter={
+          <Button
+            type="text"
+            icon={copied ? <CheckOutlined /> : <CopyOutlined />}
+            onClick={handleCopy}
+            style={{ height: 28 }}
+          />
+        }
+        style={{ fontFamily: 'monospace' }}
+      />
+    </Card>
+  )
+}
 
 const PROVIDER_OPTIONS = [
   { value: 'openai', label: 'OpenAI', upstream: 'https://api.openai.com' },
@@ -235,17 +270,11 @@ function App() {
       </div>
 
       {proxyUrl && (
-        <Card className="url-card">
-          <div className="section-label">Local URL (LAN)</div>
-          <div className="proxy-url">{proxyUrl}</div>
-        </Card>
+        <CopyableUrl url={proxyUrl} label="Local URL (LAN)" />
       )}
 
       {publicUrl && (
-        <Card className="url-card">
-          <div className="section-label">Public URL (Internet)</div>
-          <div className="proxy-url">{publicUrl}</div>
-        </Card>
+        <CopyableUrl url={publicUrl} label="Public URL (Internet)" />
       )}
     </div>
   )

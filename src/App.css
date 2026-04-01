@@ -118,12 +118,23 @@ body {
   text-align: center;
 }
 
-.proxy-url {
+.url-card .ant-input {
   font-family: monospace;
   color: #667eea;
-  font-size: 14px;
-  padding: 12px;
   background: white;
-  border-radius: 8px;
-  margin-top: 8px;
+  border-color: #e0e0e0;
+}
+
+.url-card .ant-input:hover,
+.url-card .ant-input:focus {
+  border-color: #667eea;
+}
+
+.url-card .ant-input-group-addon {
+  background: white;
+  border-color: #e0e0e0;
+}
+
+.url-card .ant-input-group-addon:hover {
+  background: #f0f0f0;
 }

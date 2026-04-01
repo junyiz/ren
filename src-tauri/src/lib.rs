@@ -160,12 +160,9 @@ fn get_tunelo_binary() -> Result<std::path::PathBuf, String> {
 
     if let Ok(output) = tunelo_check {
         if output.status.success() {
-            eprintln!("[DEBUG] tunelo found in PATH");
             return Ok(std::path::PathBuf::from("tunelo"));
         }
     }
-
-    eprintln!("[DEBUG] tunelo not in PATH, will download");
 
     // Determine platform
     let (os, arch) = {
