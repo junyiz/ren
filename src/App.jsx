@@ -169,7 +169,7 @@ function App() {
     <div className="app-container">
       <div className="app-header">
         <Title level={3} style={{ margin: 0 }}>Ren API Proxy</Title>
-        <Text type="secondary">Share your LLM API safely within LAN or over the internet</Text>
+        <Text type="secondary">Share your LLM API over LAN or internet — key stays local</Text>
       </div>
 
       <Card className="section-card">

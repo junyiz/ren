@@ -8,7 +8,7 @@ Desktop application for sharing LLM API keys within LAN or over the internet wit
 - Your API key never leaves your device
 - Simple one-click setup
 - Works with any OpenAI-compatible client
-- **Public access**: Create a public tunnel to share your proxy over the internet
+- **Public access**: Create a public tunnel to share your proxy over the internet — your API key stays on your machine
 
 ## Installation
 
@@ -36,13 +36,7 @@ Download from the [releases page](https://github.com/junyiz/ren/releases).
 
 ### Public Access (Internet)
 
-Enable "Public Access" to create a public tunnel via tunelo relay. This allows anyone on the internet to access your proxy using the generated public URL.
-
-You can choose between:
-- **ren.im** - Default relay service
-- **tunelo.net** - Alternative relay service
-
-Your API key remains secure - it only exists on your local machine and is never shared with the relay service.
+Enable "Public Access" to create a public tunnel via tunelo relay. Your API key stays on your local machine and is never shared with the relay service.
 
 ## For Users Connecting to Your Proxy
 
