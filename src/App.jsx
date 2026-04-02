@@ -199,12 +199,12 @@ function App() {
       <Collapse
         bordered={false}
         style={{ background: "#fff" }}
-        activeKey={configExpanded ? ["config"] : []}
-        onChange={(keys) => setConfigExpanded(keys.includes("config"))}
+        activeKey={configExpanded ? ["settings"] : []}
+        onChange={(keys) => setConfigExpanded(keys.includes("settings"))}
         items={[
           {
-            key: "config",
-            label: "Config Settings",
+            key: "settings",
+            label: "Settings",
             children: (
               <Form form={form}>
                 <div className="config-label">Provider Settings</div>
