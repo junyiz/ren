@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Ren API Proxy",
+  "productName": "Ren AI Proxy",
   "version": "0.1.0",
   "identifier": "im.ren.api-proxy",
   "build": {
@@ -10,7 +10,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Ren API Proxy",
+        "title": "Ren AI Proxy",
         "width": 640,
         "height": 720,
         "resizable": true,

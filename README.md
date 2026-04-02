@@ -1,4 +1,4 @@
-# Ren API Proxy
+# Ren AI Proxy
 
 Desktop application for sharing LLM API within LAN or over the internet without exposing keys.
 
@@ -28,7 +28,7 @@ Download from the [releases page](https://github.com/junyiz/ren/releases).
 
 ## Usage
 
-1. Download and install Ren API Proxy
+1. Download and install Ren AI Proxy
 2. Enter your API key in the text field
 3. Select your provider (OpenAI, Anthropic, or Ollama)
 4. Click "Start Service"

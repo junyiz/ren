@@ -189,7 +189,7 @@ function App() {
     <div className="app-container">
       <div className="app-header">
         <Title level={3} style={{ margin: 0 }}>
-          Ren API Proxy
+          Ren AI Proxy
         </Title>
         <Text type="secondary">
           Share your LLM API over LAN or internet — key stays local
