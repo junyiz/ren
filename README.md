@@ -1,6 +1,19 @@
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+  <strong>English</strong> | <a href="docs/README.zh-CN.md">中文</a>
+</p>
+
 # Ren AI Proxy
 
 Desktop application for sharing LLM API within LAN or over the internet without exposing keys.
+
+<p align="center">
+  <img src="docs/images/ren.png" width="800" alt="Desktop application for sharing LLM API within LAN or over the internet without exposing keys" />
+</p>
+
 
 ## Features
 
