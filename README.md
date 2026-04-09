@@ -11,7 +11,7 @@
 Desktop application for sharing LLM API within LAN or over the internet without exposing keys.
 
 <p align="center">
-  <img src="docs/images/ren.png" width="800" alt="Desktop application for sharing LLM API within LAN or over the internet without exposing keys" />
+  <img src="docs/images/ren.png" width="480" alt="Desktop application for sharing LLM API within LAN or over the internet without exposing keys" />
 </p>
 
 

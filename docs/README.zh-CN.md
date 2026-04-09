@@ -11,7 +11,7 @@
 一款桌面应用，可在局域网或互联网上共享 LLM API，无需暴露密钥。
 
 <p align="center">
-  <img src="docs/images/ren.png" width="800" alt="一款桌面应用，可在局域网或互联网上共享 LLM API，无需暴露密钥" />
+  <img src="images/ren.png" width="480" alt="一款桌面应用，可在局域网或互联网上共享 LLM API，无需暴露密钥" />
 </p>
 
 ## 功能特性
