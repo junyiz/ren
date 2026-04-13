@@ -27,7 +27,7 @@
 ### 从源码构建
 
 ```bash
-cd ren-desktop
+cd ren
 npm install
 npm run tauri build
 ```
@@ -37,6 +37,14 @@ npm run tauri build
 ### 预编译版本
 
 从 [发布页面](https://github.com/junyiz/ren/releases) 下载。
+
+
+> 初次运行说明：macOS 会拦截从互联网下载的未签名应用。将 Ren AI Proxy.app 拖入“应用程序”文件夹后，请打开终端 (Terminal) 并运行：
+> 
+> ```bash
+> xattr -cr /Applications/Ren\ AI\ Proxy.app/
+> ```
+
 
 ## 使用方法
 

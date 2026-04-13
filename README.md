@@ -28,7 +28,7 @@ Desktop application for sharing LLM API within LAN or over the internet without 
 ### Build from source
 
 ```bash
-cd ren-desktop
+cd ren
 npm install
 npm run tauri build
 ```
@@ -38,6 +38,12 @@ The built application will be in `src-tauri/target/release/bundle/`.
 ### Pre-built binaries
 
 Download from the [releases page](https://github.com/junyiz/ren/releases).
+
+> First launch note: macOS will block unsigned apps downloaded from the internet. After dragging Ren AI Proxy to Applications, open Terminal and run:
+> 
+> ```bash
+> xattr -cr /Applications/Ren\ AI\ Proxy.app/
+> ```
 
 ## Usage
 
