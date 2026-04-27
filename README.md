@@ -8,7 +8,7 @@
 
 # Ren AI Proxy
 
-Desktop application for sharing LLM API within LAN or over the internet without exposing keys.
+A desktop proxy application for sharing AI quotas, which can share LLM apis on a local area network or the Internet without exposing keys.
 
 <p align="center">
   <img src="docs/images/ren.png" width="480" alt="Desktop application for sharing LLM API within LAN or over the internet without exposing keys" />
