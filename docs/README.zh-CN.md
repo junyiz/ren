@@ -8,7 +8,7 @@
 
 # Ren AI Proxy
 
-一款共享 AI 配额的桌面代理应用，可在局域网或互联网上共享 LLM API，无需暴露密钥。
+一款支持局域网及公网共享的 AI 配额代理工具。无需分发 API Key 即可安全调用 LLM 资源，有效杜绝密钥泄露风险。
 
 <p align="center">
   <img src="images/ren.png" width="480" alt="一款桌面应用，可在局域网或互联网上共享 LLM API，无需暴露密钥" />
